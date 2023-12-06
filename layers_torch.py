@@ -17,22 +17,6 @@ class LSTM:
         self.params = {key: param.to(device) for key, param in self.params.items()}
         self.in_size = in_size
 
-    def initialize_optimizer(self, lr, reg):
-        self.config = {
-                       'learning_rate': lr,
-                       'regularization': reg,
-                       'beta1': .9,
-                       'beta2':.99,
-                       'epsilon':1e-8,
-                       'm_ba':torch.zeros(self.params['ba'].shape, device=self.device),
-                       'v_ba':torch.zeros(self.params['ba'].shape, device=self.device),
-                       'm_Wha':torch.zeros(self.params['Wha'].shape, device=self.device),
-                       'v_Wha':torch.zeros(self.params['Wha'].shape, device=self.device),
-                       'm_Wxa':torch.zeros(self.params['Wxa'].shape, device=self.device),
-                       'v_Wxa':torch.zeros(self.params['Wxa'].shape, device=self.device),
-                       't':30,
-        }
-
     def forward(self, x):
         (N, T, I), H = x.shape, self.params['ba'].shape[0] // 4
         self.cache = []
@@ -135,6 +119,22 @@ class LSTM:
         dba_t = da.sum(axis=0)
 
         return dx_t, dh_prev, dc_prev, dWxa_t, dWha_t, dba_t
+
+    def initialize_optimizer(self, lr, reg):
+        self.config = {
+                       'learning_rate': lr,
+                       'regularization': reg,
+                       'beta1': .9,
+                       'beta2':.99,
+                       'epsilon':1e-8,
+                       'm_ba':torch.zeros(self.params['ba'].shape, device=self.device),
+                       'v_ba':torch.zeros(self.params['ba'].shape, device=self.device),
+                       'm_Wha':torch.zeros(self.params['Wha'].shape, device=self.device),
+                       'v_Wha':torch.zeros(self.params['Wha'].shape, device=self.device),
+                       'm_Wxa':torch.zeros(self.params['Wxa'].shape, device=self.device),
+                       'v_Wxa':torch.zeros(self.params['Wxa'].shape, device=self.device),
+                       't':30,
+        }
 
     def optimize(self):
         self.params, self.config = TorchAdam(self.params, self.grads, self.config)
