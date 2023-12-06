@@ -1,6 +1,6 @@
 # LSTM From Scratch in Vanilla Python
-- Use this repo to train and test your own RNN and LSTM. You can train and fine-tune a model on <b>any</b> text file, and it will generate text that sounds like it. Also, feel free to browse the classes in `torch_layers.py` and `numpy_implementations/layers.py`. They contain full and clear implementations of every layer in a RNN.
-- This project started as a way to better understand the underlying principles of NLP. As I implemented these models, I tried to make the code as simple and well-documented as possible. This way, I hoped to make the (at first, very confusing) backpropagation through time a little bit simpler to understand and replicate.
+- Use this repo to __train and test your own RNN and LSTM__.
+- You can train and fine-tune a model on <b>any</b> text file, and it will generate text that sounds like it.
 - Some motivation for this project also came from <i>Artificial intelligence, a Guide for Thinking Humans</i> by Melanie Mirchell.
 - In many layers, I took inspiration from my work on assignments A1-A3 of the CS231n class, and A1-A5 of CS224n.
 
