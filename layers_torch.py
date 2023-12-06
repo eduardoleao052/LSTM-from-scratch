@@ -2,6 +2,152 @@
 import numpy as np
 from utils import *
 
+
+class LSTM:
+    ''' Full LSTM implementation '''
+    def __init__(self, in_size, hidden_size, device = 'cpu'):
+        self.device = device
+        self.params = {
+            'Wha': torch.randn(hidden_size, hidden_size * 4) / np.sqrt(hidden_size),
+            'Wxa': torch.randn(in_size, hidden_size * 4) / np.sqrt(in_size),
+            'ba': torch.zeros(hidden_size * 4),
+            'type': torch.tensor([3])
+        }
+
+        self.params = {key: param.to(device) for key, param in self.params.items()}
+        self.in_size = in_size
+
+    def initialize_optimizer(self, lr, reg):
+        self.config = {
+                       'learning_rate': lr,
+                       'regularization': reg,
+                       'beta1': .9,
+                       'beta2':.99,
+                       'epsilon':1e-8,
+                       'm_ba':torch.zeros(self.params['ba'].shape, device=self.device),
+                       'v_ba':torch.zeros(self.params['ba'].shape, device=self.device),
+                       'm_Wha':torch.zeros(self.params['Wha'].shape, device=self.device),
+                       'v_Wha':torch.zeros(self.params['Wha'].shape, device=self.device),
+                       'm_Wxa':torch.zeros(self.params['Wxa'].shape, device=self.device),
+                       'v_Wxa':torch.zeros(self.params['Wxa'].shape, device=self.device),
+                       't':30,
+        }
+
+    def forward(self, x):
+        (N, T, I), H = x.shape, self.params['ba'].shape[0] // 4
+        self.cache = []
+
+        # Initialize the hidden state and cell state:
+        h = [torch.zeros([N,H],device=self.device)]
+        next_c = torch.zeros([N,H],device=self.device)
+
+        # Iterate over time:
+        for t in range(x.shape[1]):
+            # Run forward pass, retrieve next h and append new cache
+            next_h, next_c, cache_t = self.forward_step(x[:, t], h[t], next_c)
+            h.append(next_h)
+            self.cache.append(cache_t)
+        
+        # Stack over T, excluding first h:
+        self.h = next_h
+        self.c = next_c
+        h = torch.stack(h[1:], axis=1)
+        return h 
+
+    def forward_step(self, xt, h_prev, c_prev):
+        H = self.params['ba'].shape[0] // 4
+
+        # Get four gate values:
+        a = torch.matmul(xt, self.params['Wxa']) + torch.matmul(h_prev, self.params['Wha']) + self.params['ba']
+        a = torch.split(a, H, dim=1)
+
+        # Get gate activations:
+        i, f, o, g = sigmoid(a[0]), sigmoid(a[1]), sigmoid(a[2]), torch.tanh(a[3])
+
+        # Compute next cell state and hidden state:
+        c_next = f * c_prev
+        c_next += i*g
+        h_next =  o * torch.tanh(c_next)
+        cache = (h_next, h_prev, c_next, c_prev, i, f, o, g, xt)
+
+        return h_next, c_next, cache
+
+    def backward(self, dz):
+        (N, T, H), (N,D) = dz.shape, self.cache[0][-1].shape
+
+        # Initialize gradients as zero:
+        dh_next = torch.zeros([N,H],device=self.device)
+        dc_next = torch.zeros([N,H],device=self.device)
+        self.grads = {
+                    'dx': torch.zeros((N,T,D), device=self.device), # create dx with shape == x.shape
+                    'dba': torch.zeros_like(self.params['ba'], device=self.device),
+                    'dWha': torch.zeros_like(self.params['Wha'], device=self.device),
+                    'dWxa': torch.zeros_like(self.params['Wxa'], device=self.device),
+                    }
+
+        # Iterate over time, backwards:
+        for t in range(T-1, -1, -1):
+            
+            # Run backward pass for "t" timestep and update the gradients:
+            dx_t, dh_next, dc_next, dWxa_t, dWha_t, dba_t = self.backward_step(dz[:, t], dh_next, dc_next, self.cache[t])
+            self.grads['dx'][:, t] = dx_t
+            self.grads['dWxa'] += dWxa_t
+            self.grads['dWha'] += dWha_t
+            self.grads['dba'] += dba_t
+
+            # Clip the gradients, so that the module never passes 20 (for stability):
+            for key in self.grads.keys():
+                module_grad = torch.sqrt(torch.sum(self.grads[key]**2))
+                if module_grad >= 20:
+                    self.grads[key] = (self.grads[key] / module_grad) * 20
+
+        return self.grads['dx']
+
+    def backward_step(self, dzt, dh_next, dc_next, cache):
+        _, h_prev, c_next, c_prev, i, f, o, g, xt = cache
+
+        # Backprop through output:
+        dh_mid = dh_next + dzt
+        dc_prev = dc_next + o * (1-torch.square(torch.tanh(c_next))) * dh_mid
+
+        # Backprop through gate exits:
+        di = g * dc_prev
+        df = c_prev * dc_prev
+        do = torch.tanh(c_next) * dh_mid
+        dg = i * dc_prev
+
+        # Backprp through activation functions (sigmoid and tanh):
+        da_i = di * i * (1 - i)
+        da_f = df * f * (1 - f)
+        da_o = do * o * (1 - o)
+        da_g = dg * (1 - torch.square(g))
+
+        # Stack gate values:
+        da = torch.concatenate([da_i, da_f, da_o, da_g],axis = 1)
+        #da = torch.hstack((da_i, da_f, da_o, da_g))
+
+        # Get gradients for previous hidden state, cell state, inputs and Weight matrices.
+        dx_t = da @ self.params['Wxa'].T
+        dh_prev = da @ self.params['Wha'].T
+        dc_prev = dc_prev * f
+        dWxa_t = xt.T @ da
+        dWha_t = h_prev.T @ da
+        dba_t = da.sum(axis=0)
+
+        return dx_t, dh_prev, dc_prev, dWxa_t, dWha_t, dba_t
+
+    def optimize(self):
+        self.params, self.config = TorchAdam(self.params, self.grads, self.config)
+
+    def load_params(self, params_dict):
+        self.params = {key: torch.tensor(value,device=self.device) for key, value in params_dict.items()}
+
+    def save_params(self):
+        return {key: value.tolist() for key, value in self.params.items()}
+
+
+
+
 class Embedding:
     def __init__(self, in_size, embed_size, device = 'cpu'):
         self.params = {
@@ -284,131 +430,6 @@ class RNN:
         dbh_t = dz.sum(axis=0)
 
         return dx_t, dh_prev, dWxh_t, dWhh_t, dbh_t
-
-    def optimize(self):
-        self.params, self.config = TorchAdam(self.params, self.grads, self.config)
-
-    def load_params(self, params_dict):
-        self.params = {key: torch.tensor(value,device=self.device) for key, value in params_dict.items()}
-
-    def save_params(self):
-        return {key: value.tolist() for key, value in self.params.items()}
-
-class LSTM:
-    def __init__(self, in_size, hidden_size, device = 'cpu'):
-        self.device = device
-        self.params = {
-            'Wha': torch.randn(hidden_size, hidden_size * 4) / np.sqrt(hidden_size),
-            'Wxa': torch.randn(in_size, hidden_size * 4) / np.sqrt(in_size),
-            'ba': torch.zeros(hidden_size * 4),
-            'type': torch.tensor([3])
-        }
-
-        self.params = {key: param.to(device) for key, param in self.params.items()}
-        self.in_size = in_size
-
-    def initialize_optimizer(self, lr, reg):
-        self.config = {
-                       'learning_rate': lr,
-                       'regularization': reg,
-                       'beta1': .9,
-                       'beta2':.99,
-                       'epsilon':1e-8,
-                       'm_ba':torch.zeros(self.params['ba'].shape, device=self.device),
-                       'v_ba':torch.zeros(self.params['ba'].shape, device=self.device),
-                       'm_Wha':torch.zeros(self.params['Wha'].shape, device=self.device),
-                       'v_Wha':torch.zeros(self.params['Wha'].shape, device=self.device),
-                       'm_Wxa':torch.zeros(self.params['Wxa'].shape, device=self.device),
-                       'v_Wxa':torch.zeros(self.params['Wxa'].shape, device=self.device),
-                       't':30,
-        }
-
-    def forward(self, x):
-        (N, T, I), H = x.shape, self.params['ba'].shape[0] // 4
-        self.cache = []
-        h = [torch.zeros([N,H],device=self.device)]
-        next_c = torch.zeros([N,H],device=self.device)
-        for t in range(x.shape[1]):
-            # Run forward pass, retrieve next h and append new cache
-            next_h, next_c, cache_t = self.forward_step(x[:, t], h[t], next_c)
-            h.append(next_h)
-            self.cache.append(cache_t)
-        
-        # Stack over T, excluding h0
-        self.h = next_h
-        self.c = next_c
-        h = torch.stack(h[1:], axis=1)
-        return h 
-
-    def forward_step(self, xt, h_prev, c_prev):
-        H = self.params['ba'].shape[0] // 4
-
-        a = torch.matmul(xt, self.params['Wxa']) + torch.matmul(h_prev, self.params['Wha']) + self.params['ba']
-        a = torch.split(a, H, dim=1)
-
-        i, f, o, g = sigmoid(a[0]), sigmoid(a[1]), sigmoid(a[2]), torch.tanh(a[3])
-        c_next = f * c_prev
-        c_next += i*g
-        h_next =  o * torch.tanh(c_next)
-        cache = (h_next, h_prev, c_next, c_prev, i, f, o, g, xt)
-
-        return h_next, c_next, cache
-
-    def backward(self, dz):
-        (N, T, H), (N,D) = dz.shape, self.cache[0][-1].shape
-
-        # initialize gradients as zero
-        dh_next = torch.zeros([N,H],device=self.device)
-        dc_next = torch.zeros([N,H],device=self.device)
-        self.grads = {
-                    'dx': torch.zeros((N,T,D), device=self.device), # create dx with shape == x.shape
-                    'dba': torch.zeros_like(self.params['ba'], device=self.device),
-                    'dWha': torch.zeros_like(self.params['Wha'], device=self.device),
-                    'dWxa': torch.zeros_like(self.params['Wxa'], device=self.device),
-                    }
-        
-        for t in range(T-1, -1, -1):
-            # Run backward pass for t^th timestep and update the gradient matrices
-            dx_t, dh_next, dc_next, dWxa_t, dWha_t, dba_t = self.backward_step(dz[:, t], dh_next, dc_next, self.cache[t])
-            self.grads['dx'][:, t] = dx_t
-            self.grads['dWxa'] += dWxa_t
-            self.grads['dWha'] += dWha_t
-            self.grads['dba'] += dba_t
-
-            for key in self.grads.keys():
-                module_grad = torch.sqrt(torch.sum(self.grads[key]**2))
-                if module_grad >= 20:
-                    self.grads[key] = (self.grads[key] / module_grad) * 20
-
-        return self.grads['dx']
-
-    def backward_step(self, dzt, dh_next, dc_next, cache):
-        _, h_prev, c_next, c_prev, i, f, o, g, xt = cache
-
-        dh_mid = dh_next + dzt
-        dc_prev = dc_next + o * (1-torch.square(torch.tanh(c_next))) * dh_mid
-        
-        di = g * dc_prev
-        df = c_prev * dc_prev
-        do = torch.tanh(c_next) * dh_mid
-        dg = i * dc_prev
-
-        da_i = di * i * (1 - i)
-        da_f = df * f * (1 - f)
-        da_o = do * o * (1 - o)
-        da_g = dg * (1 - torch.square(g))
-        
-        da = torch.concatenate([da_i, da_f, da_o, da_g],axis = 1)
-        #da = torch.hstack((da_i, da_f, da_o, da_g))
-
-        dx_t = da @ self.params['Wxa'].T
-        dh_prev = da @ self.params['Wha'].T
-        dc_prev = dc_prev * f
-        dWxa_t = xt.T @ da
-        dWha_t = h_prev.T @ da
-        dba_t = da.sum(axis=0)
-
-        return dx_t, dh_prev, dc_prev, dWxa_t, dWha_t, dba_t
 
     def optimize(self):
         self.params, self.config = TorchAdam(self.params, self.grads, self.config)
