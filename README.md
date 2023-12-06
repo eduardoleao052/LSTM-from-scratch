@@ -1,6 +1,7 @@
 # Educational LSTM From Scratch in Vanilla Python
 - Use this repo to __train and test your own RNN and LSTM__.
 - You can train and fine-tune a model on <b>any</b> text file, and it will generate text that sounds like it.
+- The LSTM layers are in [layers.py](layers.py).
 - Some motivation for this project also came from <i>Artificial intelligence, a Guide for Thinking Humans</i> by Melanie Mirchell.
 - In many layers, I took inspiration from my work on assignments A1-A3 of the CS231n class, and A1-A5 of CS224n.
 
