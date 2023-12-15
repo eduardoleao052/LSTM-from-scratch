@@ -57,22 +57,6 @@ pip install -r requirements.txt
 
 </details>
 <details>
-<summary> <h3> Build a custom Model </h3> </summary>
-  
-- To customize the model layers, go into `config.py` and edit the `model_layers` dictionary.
-- Each layer takes as arguments the input and output sizes.
-- You may chose among the following layers:
-  - `Embedding` (turns input indexes into vectors)
-  - `TemporalDense` (simple fully-connected layer)
-  - `RNN` (Recurrent Neural Network layer)
-  - `RNNBlock` (RNN + TemporalDense with residual connections)
-  - `LSTM` (Long Short Term Memory layer)
-  - `TemporalSoftmax` (returns probabilities for next generated character)
-> **Note:** The first layer must be a `Embedding` layer with input size equals `vocab_size`.
-> **Note:** The last layer must be a `TemporalSoftmax` layer with the previous layer's output size equals `vocab_size`.
-> **Note:** The training is by default implemented to detect CUDA availability, and run on CUDA if found.
-</details>
-<details>
 <summary> <h3> Pretraining </h3> </summary>
   
 - To pretrain a RNN on language modeling (predicting next character), first go into `config.py` and chose the necessary arguments.
@@ -143,7 +127,23 @@ python3 run.py --test --config=config.py
 ```
 
 </details>
+<details>
+<summary> <h3> Build a custom Model </h3> </summary>
+  
+- To customize the model layers, go into `config.py` and edit the `model_layers` dictionary.
+- Each layer takes as arguments the input and output sizes.
+- You may chose among the following layers:
+  - `Embedding` (turns input indexes into vectors)
+  - `TemporalDense` (simple fully-connected layer)
+  - `RNN` (Recurrent Neural Network layer)
+  - `RNNBlock` (RNN + TemporalDense with residual connections)
+  - `LSTM` (Long Short Term Memory layer)
+  - `TemporalSoftmax` (returns probabilities for next generated character)
+> **Note:** The first layer must be a `Embedding` layer with input size equals `vocab_size`.
+> **Note:** The last layer must be a `TemporalSoftmax` layer with the previous layer's output size equals `vocab_size`.
+> **Note:** The training is by default implemented to detect CUDA availability, and run on CUDA if found.
 
+</details>
 
 ## 3. Results
 - The Recurrent Neural Network implementation in main.py achieved a loss of <b>1.42</b> with a 78 vocabulary size training on the <i>tiny shakespeare</i> corpus in `shakespeare.txt`.
