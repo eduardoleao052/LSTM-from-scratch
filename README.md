@@ -52,7 +52,6 @@ conda activate environment_name
 ```
 pip install -r requirements.txt
 ```
-- Note: The training is by default implemented to detect CUDA availability, and run on CUDA if found.
 - To run, install the necessary requirements and a text corpus (any text you wish to replicate, .txt format).
 - Please download your text file in the data directory.
 
@@ -69,9 +68,9 @@ pip install -r requirements.txt
   - `RNNBlock` (RNN + TemporalDense with residual connections)
   - `LSTM` (Long Short Term Memory layer)
   - `TemporalSoftmax` (returns probabilities for next generated character)
-- Note: the first layer must be a `Embedding` layer with input size equals `vocab_size`.
-- Note: the last layer must be a `TemporalSoftmax` layer with the previous layer's output size equals `vocab_size`.
-
+> **Note:** The first layer must be a `Embedding` layer with input size equals `vocab_size`.
+> **Note:** The last layer must be a `TemporalSoftmax` layer with the previous layer's output size equals `vocab_size`.
+> **Note:** The training is by default implemented to detect CUDA availability, and run on CUDA if found.
 </details>
 <details>
 <summary> <h3> Pretraining </h3> </summary>
