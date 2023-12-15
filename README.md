@@ -2,7 +2,7 @@
 - Use this repo to __train and test your own RNN and LSTM__.
 - You can train and fine-tune a model on <b>any</b> text file, and it will generate text that sounds like it.
 - The LSTM layers, __with full forward and backprop__, are in [layers_torch.py](layers_torch.py).
-- Some motivation for this project also came from <i>Artificial intelligence, a Guide for Thinking Humans</i> by Melanie Mirchell.
+- Some motivation for this project came from <i>Artificial intelligence, a Guide for Thinking Humans</i> by Melanie Mitchell.
 - In many layers, I took inspiration from my work on assignments A1-A3 of the CS231n class, and A1-A5 of CS224n.
 
 ## 1. Project Structure
