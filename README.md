@@ -1,3 +1,19 @@
+<p align="left">
+    <a href="https://github.com/eduardoleao052/Transformer-from-scratch/pulse" alt="Activity">
+        <img src="https://img.shields.io/github/commit-activity/m/eduardoleao052/Transformer-from-scratch" /></a>
+    <a href="https://github.com/eduardoleao052/Transformer-from-scratch/graphs/contributors" alt="Contributors">
+        <img src="https://img.shields.io/github/contributors/eduardoleao052/Transformer-from-scratch" /></a>
+    <a href="https://www.python.org/">
+        <img src="https://img.shields.io/badge/language-Python-blue">
+    </a>
+    <a href="mailto:eduardoleao052@usp.br">
+        <img src="https://img.shields.io/badge/-Email-red?style=flat-square&logo=gmail&logoColor=white">
+    </a>
+    <a href=""https://www.linkedin.com/in/eduardoleao052/">
+        <img src="https://img.shields.io/badge/-Linkedin-blue?style=flat-square&logo=linkedin">
+    </a>
+</p>
+
 # Educational LSTM From Scratch in Vanilla Python
 - Use this repo to __train and test your own RNN and LSTM__.
 - You can train and fine-tune a model on <b>any</b> text file, and it will generate text that sounds like it.
@@ -22,7 +38,9 @@
     
 - `utils.py` : File with helper functions and classes.
 ## 2. Running it Yourself
-### Requirements
+<details>
+<summary> <h3> Requirements </h3> </summary>
+  
 - The required packages are listed on recquirements.txt. The numpy-based implementations of the layers are in the `numpy_implementations` folder in `layers.py` and `model.py`, and the torch implementation is on layers_torch.py and model_torch.py.
 - The torch version is a little faster, and is the one used on the run.py implementation. The numpy files are listed for educational purposes only.
 - To setup and join a miniconda virtual environment, run on terminal:
@@ -38,7 +56,10 @@ pip install -r requirements.txt
 - To run, install the necessary requirements and a text corpus (any text you wish to replicate, .txt format).
 - Please download your text file in the data directory.
 
-### Build the Model
+</details>
+<details>
+<summary> <h3> Build a custom Model </h3> </summary>
+  
 - To customize the model layers, go into `config.py` and edit the `model_layers` dictionary.
 - Each layer takes as arguments the input and output sizes.
 - You may chose among the following layers:
@@ -51,7 +72,10 @@ pip install -r requirements.txt
 - Note: the first layer must be a `Embedding` layer with input size equals `vocab_size`.
 - Note: the last layer must be a `TemporalSoftmax` layer with the previous layer's output size equals `vocab_size`.
 
-### Pretraining
+</details>
+<details>
+<summary> <h3> Pretraining </h3> </summary>
+  
 - To pretrain a RNN on language modeling (predicting next character), first go into `config.py` and chose the necessary arguments.
 - In the `training_params` dictionary, choose:
   - `--corpus` (name of file in data directory with the text you want to train the model on) 
@@ -74,7 +98,10 @@ python3 run.py --train --config=config.py
 - Note: for pretraining, a really large text corpus is usually necessary. I obtained good results with ~1M characters.
 - Note: if you want to alter layers/dimensions, do so in the `config.py` file, as described in the __Build the Model__ section.
   
-### Fine-tuning
+</details>
+<details>
+<summary> <h3> Fine-Tuning </h3> </summary>
+  
 - To fine-tune a RNN on a given text file, go to `config.py` and choose the arguments:
 - In the `fine_tuning_params` dictionary, choose:
   - `--corpus` (name of file in data directory with the text you want to train the model on) 
@@ -97,7 +124,10 @@ python3 run.py --fine_tune --config=config.py
 
 - Note: for fine-tuning, a you can get adventurous with smaller text files. I obtained really nice results with ~10K characters, such as a small Shakespeare dataset and Bee Gees' songs.
 
-### Testing
+</details>
+<details>
+<summary> <h3> Testing </h3> </summary>
+  
 - To test your RNN, go to `config.py` and choose the arguments:
 - In the `testing_params` dictionary, choose:
   - `--from_path` (.json file that contains pretrained model) 
