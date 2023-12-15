@@ -143,6 +143,9 @@ python3 run.py --fine_tune --config=config.py
 python3 run.py --test --config=config.py
 ```
 
+</details>
+
+
 ## 3. Results
 - The Recurrent Neural Network implementation in main.py achieved a loss of <b>1.42</b> with a 78 vocabulary size training on the <i>tiny shakespeare</i> corpus in `shakespeare.txt`.
 - Note: the training took ~1h and 1500 steps.
