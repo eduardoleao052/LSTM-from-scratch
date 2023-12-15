@@ -78,8 +78,7 @@ pip install -r requirements.txt
 python3 run.py --train --config=config.py
 ```
 - Whenever you feel like the samples are good enough, you can kill the training at any time. This will NOT corrupt the model saved .json file, and you may proceed to testing and fine_tuning on smaller datasets.
-- Note: for pretraining, a really large text corpus is usually necessary. I obtained good results with ~1M characters.
-- Note: if you want to alter layers/dimensions, do so in the `config.py` file, as described in the __Build the Model__ section.
+> **Note:** For pretraining, a really large text corpus is usually necessary. I obtained good results with ~1M characters. If you want to alter layers/dimensions, do so in the `config.py` file, as described in the __Build the Model__ section.
   
 </details>
 <details>
@@ -105,7 +104,7 @@ python3 run.py --train --config=config.py
 python3 run.py --fine_tune --config=config.py
 ```
 
-- Note: for fine-tuning, a you can get adventurous with smaller text files. I obtained really nice results with ~10K characters, such as a small Shakespeare dataset and Bee Gees' songs.
+> **Note:** For fine-tuning, a you can get adventurous with smaller text files. I obtained really nice results with ~10K characters, such as a small Shakespeare dataset and Bee Gees' songs.
 
 </details>
 <details>
@@ -117,7 +116,7 @@ python3 run.py --fine_tune --config=config.py
   - `--sample_size` (how many characters will be generated, "sounding" like the source text) <b>[OPTIONAL]</b>
   - `--seed` (the start to the string your model generates, it has to "continue" it) <b>[OPTIONAL]</b>
   
-- Note: the testing script does not access any hyperparametes, because the model is already trained.
+> **Note:** the testing script does not access any hyperparametes, because the model is already trained.
   
 - `model_layers` will not be accessed during testing, as you will use the layers of the pretrained model.
 
@@ -145,7 +144,7 @@ python3 run.py --test --config=config.py
 
 ## 3. Results
 - The Recurrent Neural Network implementation in main.py achieved a loss of <b>1.42</b> with a 78 vocabulary size training on the <i>tiny shakespeare</i> corpus in `shakespeare.txt`.
-- Note: the training took ~1h and 1500 steps.
+> **Note:** The training took ~1h and 1500 steps.
 ```
 CORIOLANUS:
 I am the guilty of us, friar is too tate.
@@ -166,10 +165,10 @@ For that O, they say they shall, for son that studies soul
 Having done,
 And this is the rest in this in a fellow.
 ```
-- Note: results achieved with the model configuration exactly as presented in this repo.
+> **Note:** Results achieved with the model configuration exactly as presented in this repo.
 
 - The Long Short Term Memory (LSTM) implementation, using LSTMs instead of RNNs, achieved a loss of <b>1.32</b> with a 78 vocabulary size training on the <i>tiny shakespeare</i> corpus in `shakespeare.txt`.
-- Note: the training took ~2h30 and 1500 steps.
+> **Note:** The training took ~2h30 and 1500 steps.
 ```
 HERMIONE:
 Of all the sin of the hard heart; and hence,
@@ -185,6 +184,6 @@ QUEEN ELIZABETH:
 Thou wear'st out yourself, and indeed Edward,
 and his hours' vent, O why, away.
 ```
-- Note: Training times seemed to be a little faster with GPU (GTX 1070 vs M2 CPU), but the improvement was not dramatic (maybe due to iterative and non-paralellizeable nature of RNNs).
+> **Note:** Training times seemed to be a little faster with GPU (GTX 1070 vs M2 CPU), but the improvement was not dramatic (maybe due to iterative and non-paralellizeable nature of RNNs).
 - Thanks for reading!
 
