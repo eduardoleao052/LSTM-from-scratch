@@ -139,9 +139,7 @@ python3 run.py --test --config=config.py
   - `RNNBlock` (RNN + TemporalDense with residual connections)
   - `LSTM` (Long Short Term Memory layer)
   - `TemporalSoftmax` (returns probabilities for next generated character)
-> **Note:** The first layer must be a `Embedding` layer with input size equals `vocab_size`.
-> **Note:** The last layer must be a `TemporalSoftmax` layer with the previous layer's output size equals `vocab_size`.
-> **Note:** The training is by default implemented to detect CUDA availability, and run on CUDA if found.
+> **Note:** The first layer must be a `Embedding` layer with input size equals `vocab_size`. The last layer must be a `TemporalSoftmax` layer with the previous layer's output size equals `vocab_size`. The training is by default implemented to detect CUDA availability, and run on CUDA if found.
 
 </details>
 
