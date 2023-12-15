@@ -1,8 +1,8 @@
 <p align="left">
-    <a href="https://github.com/eduardoleao052/Transformer-from-scratch/pulse" alt="Activity">
-        <img src="https://img.shields.io/github/commit-activity/m/eduardoleao052/Transformer-from-scratch" /></a>
-    <a href="https://github.com/eduardoleao052/Transformer-from-scratch/graphs/contributors" alt="Contributors">
-        <img src="https://img.shields.io/github/contributors/eduardoleao052/Transformer-from-scratch" /></a>
+    <a href="https://github.com/eduardoleao052/LSTM-from-scratch/pulse" alt="Activity">
+        <img src="https://img.shields.io/github/commit-activity/m/eduardoleao052/LSTM-from-scratch" /></a>
+    <a href="https://github.com/eduardoleao052/LSTM-from-scratch/graphs/contributors" alt="Contributors">
+        <img src="https://img.shields.io/github/contributors/eduardoleao052/LSTM-from-scratch" /></a>
     <a href="https://www.python.org/">
         <img src="https://img.shields.io/badge/language-Python-blue">
     </a>
