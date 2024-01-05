@@ -607,7 +607,7 @@ class TemporalBatchNorm:
     def __init__(self, gamma = 1, beta = 0, device = 'cpu'):
         self.params = {
             'gamma': gamma,
-            'beta': beta
+            'beta': beta            
             }
 
     def initialize_optimizer(self,lr, reg):
